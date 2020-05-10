@@ -1,2 +1,2 @@
 # RestApi Application (GraphQL, Express, MySQL)
-Есть баги
+Есть баги, пока не исправлены
