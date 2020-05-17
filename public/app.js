@@ -8,26 +8,26 @@ new Vue({
             todos: []
         }
     },
-    created(){
-       const query = `
-       query{
-        getTodos{
-          id title done createdAt updateAt
+    created() {
+        const query = `
+      query {
+        getTodos {
+          id title done createdAt updatedAt
         }
-       }
-       `
+      }
+    `
 
         fetch('/graphql', {
             method: 'post',
             headers: {
-                'Content-type': 'application/json',
+                'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify({query})
+            body: JSON.stringify({ query })
         })
             .then(res => res.json())
             .then(response => {
-                this.todos = response.data.getTodos()
+                this.todos = response.data.getTodos
             })
     },
     methods: {
@@ -36,37 +36,70 @@ new Vue({
             if (!title) {
                 return
             }
-            fetch('/api/todo/', {
+            const query = `
+        mutation {
+          createTodo(todo: {title: "${title}"}) {
+            id title done createdAt updatedAt
+          }
+        }
+      `
+            fetch('/graphql', {
                 method: 'post',
-                headers: {'Content-type': 'application/json'},
-                body: json.stringify({title})
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({query})
             })
                 .then(res => res.json())
-                .then(({todo}) => {
+                .then(response => {
+                    const todo = response.data.createTodo
                     this.todos.push(todo)
                     this.todoTitle = ''
                 })
                 .catch(e => console.log(e))
         },
         removeTodo(id) {
-            fetch('/api/todo/' + id, {
-                method: 'delete'
+            const query = `
+        mutation {
+          deleteTodo(id: "${id}")
+        }
+      `
+            fetch('/graphql', {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ query })
             })
                 .then(() => {
                     this.todos = this.todos.filter(t => t.id !== id)
                 })
                 .catch(e => console.log(e))
         },
-        completeTodo(id){
-            fetch('/api/todo/' + id, {
-                method: 'put',
-                headers: {'Content-type': 'application/json'},
-                body: JSON.stringify({done: true})
+        completeTodo(id) {
+            const query = `
+        mutation {
+          completeTodo(id: "${id}") {
+            updatedAt
+          }
+        }
+      `
+
+
+            fetch('/graphql', {
+                method: 'post',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ query })
             })
                 .then(res => res.json())
-                .then(({todo}) => {
-                    const idx = this.todos.findIndex(t => t.id === todo.id)
-                    this.todos[idx].updateAt = todo.updateAt
+                .then(response => {
+                    const idx = this.todos.findIndex(t => t.id === id)
+                    this.todos[idx].updatedAt = response.data.completeTodo.updatedAt
                 })
                 .catch(e => console.log(e))
         }
@@ -82,13 +115,12 @@ new Vue({
                 day: '2-digit'
             }
 
-            if (withTime){
+            if (withTime) {
                 options.hour = '2-digit'
                 options.minute = '2-digit'
                 options.second = '2-digit'
             }
-
-            return new Intl.DateTimeFormat('ru-RU', options ).format(new Date(+value))
+            return new Intl.DateTimeFormat('ru-RU', options).format(new Date(+value))
         }
     }
 })
