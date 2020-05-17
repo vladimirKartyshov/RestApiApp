@@ -29,3 +29,4 @@ async function start() {
         console.log(e)
     }
 }
+//<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css"> к проекты отношения не имеет
